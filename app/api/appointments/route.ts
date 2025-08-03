@@ -1,18 +1,22 @@
 import { type NextRequest, NextResponse } from "next/server"
 
 // Mock database - in production, use a real database
-const appointments: Array<{
+let appointments: Array<{
   id: string
   patientId: string
   patientName: string
   patientEmail: string
+  patientPhone?: string
   doctorId?: string
   doctorName?: string
+  doctorEmail?: string
   appointmentDate: string
   appointmentTime: string
   reason: string
   symptoms: string
   status: "pending" | "approved" | "rejected" | "completed"
+  consultationFee?: number
+  meetingLink?: string
   createdAt: string
   updatedAt: string
 }> = []
@@ -80,13 +84,17 @@ export async function POST(request: NextRequest) {
       patientId: body.patientId || generateId(),
       patientName: body.patientName.trim(),
       patientEmail: body.patientEmail.trim().toLowerCase(),
+      patientPhone: body.patientPhone?.trim() || "",
       doctorId: body.doctorId || null,
       doctorName: body.doctorName || null,
+      doctorEmail: body.doctorEmail || null,
       appointmentDate: body.appointmentDate,
       appointmentTime: body.appointmentTime,
       reason: body.reason.trim(),
       symptoms: body.symptoms?.trim() || "",
       status: "pending" as const,
+      consultationFee: body.consultationFee || 0,
+      meetingLink: body.meetingLink || null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }

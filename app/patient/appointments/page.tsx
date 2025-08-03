@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Dialog,
   DialogContent,
@@ -15,7 +16,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Calendar, Clock, XCircle, Plus, MessageSquare, Phone, Video } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Calendar, Clock, XCircle, Plus, MessageSquare, Phone, Video, Star, MapPin, Languages, DollarSign, User, ArrowLeft, Search } from "lucide-react"
 import { PatientLayout } from "@/components/patient-layout"
 import { useToast } from "@/hooks/use-toast"
 
@@ -31,15 +33,46 @@ interface Appointment {
   createdAt: string
 }
 
+interface Doctor {
+  id: string
+  name: string
+  specialty: string
+  email: string
+  phone: string
+  experience: string
+  education: string
+  about: string
+  languages: string[]
+  availability: string[]
+  consultationFee: number
+  rating: number
+  totalReviews: number
+  image: string
+  status: string
+}
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [doctors, setDoctors] = useState<Doctor[]>([])
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedSpecialty, setSelectedSpecialty] = useState("all")
   const [isLoading, setIsLoading] = useState(true)
-  const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false)
+  const [isDoctorListOpen, setIsDoctorListOpen] = useState(false)
+  const [isAppointmentFormOpen, setIsAppointmentFormOpen] = useState(false)
   const [isBooking, setIsBooking] = useState(false)
   const { toast } = useToast()
 
+  const specialties = [
+    { value: "all", label: "All Specialties" },
+    { value: "general", label: "General Medicine" },
+    { value: "cardiology", label: "Cardiology" },
+    { value: "pediatrics", label: "Pediatrics" },
+    { value: "dermatology", label: "Dermatology" },
+    { value: "psychiatry", label: "Psychiatry" }
+  ]
   useEffect(() => {
     fetchAppointments()
+    fetchDoctors()
   }, [])
 
   const fetchAppointments = async () => {
@@ -65,23 +98,49 @@ export default function AppointmentsPage() {
     }
   }
 
+  const fetchDoctors = async () => {
+    try {
+      const response = await fetch("/api/doctors")
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setDoctors(data.doctors || [])
+      } else {
+        throw new Error(data.error || "Failed to fetch doctors")
+      }
+    } catch (error) {
+      console.error("Error fetching doctors:", error)
+      toast({
+        title: "Error",
+        description: "Failed to load doctors. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
   const handleBookAppointment = async (formData: FormData) => {
+    if (!selectedDoctor) return
+
     try {
       setIsBooking(true)
 
       const appointmentData = {
         patientName: formData.get("patientName") as string,
         patientEmail: formData.get("patientEmail") as string,
+        patientPhone: formData.get("patientPhone") as string,
+        doctorId: selectedDoctor.id,
+        doctorName: selectedDoctor.name,
+        doctorEmail: selectedDoctor.email,
         appointmentDate: formData.get("appointmentDate") as string,
         appointmentTime: formData.get("appointmentTime") as string,
         reason: formData.get("reason") as string,
         symptoms: formData.get("symptoms") as string,
+        consultationFee: selectedDoctor.consultationFee,
         patientId: "patient_123",
       }
 
       console.log("Booking appointment with data:", appointmentData)
 
-      const response = await fetch("/api/appointments", {
+      const response = await fetch("/api/appointments/book", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -94,10 +153,11 @@ export default function AppointmentsPage() {
       if (response.ok && data.success) {
         toast({
           title: "Appointment Booked! 🎉",
-          description: "Your appointment request has been sent to our doctors.",
+          description: `Your appointment with ${selectedDoctor.name} has been booked. The doctor will be notified via email.`,
         })
 
-        setIsBookingDialogOpen(false)
+        setIsAppointmentFormOpen(false)
+        setSelectedDoctor(null)
         fetchAppointments() // Refresh the list
       } else {
         throw new Error(data.error || "Failed to book appointment")
@@ -114,6 +174,19 @@ export default function AppointmentsPage() {
     }
   }
 
+  const handleDoctorSelect = (doctor: Doctor) => {
+    setSelectedDoctor(doctor)
+    setIsDoctorListOpen(false)
+    setIsAppointmentFormOpen(true)
+  }
+
+  const filteredDoctors = doctors.filter(doctor => {
+    const matchesSearch = doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSpecialty = selectedSpecialty === "all" || 
+                            doctor.specialty.toLowerCase().includes(selectedSpecialty.toLowerCase())
+    return matchesSearch && matchesSpecialty
+  })
   const getStatusColor = (status: string) => {
     switch (status) {
       case "approved":
@@ -166,74 +239,242 @@ export default function AppointmentsPage() {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Appointments</h1>
             <p className="text-gray-600 dark:text-gray-300">Manage your medical appointments and consultations</p>
           </div>
-          <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
+          <Dialog open={isDoctorListOpen} onOpenChange={setIsDoctorListOpen}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
                 Book New Appointment
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Book New Appointment</DialogTitle>
-                <DialogDescription>Fill in your details to request an appointment with a doctor</DialogDescription>
+                <DialogTitle>Select a Doctor</DialogTitle>
+                <DialogDescription>Choose from our qualified medical professionals</DialogDescription>
               </DialogHeader>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  handleBookAppointment(new FormData(e.currentTarget))
-                }}
-                className="space-y-4"
-              >
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="patientName">Full Name</Label>
-                    <Input id="patientName" name="patientName" defaultValue="John Doe" required />
+              
+              {/* Search and Filter */}
+              <div className="space-y-4">
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        placeholder="Search doctors by name or specialty..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="patientEmail">Email</Label>
-                    <Input
-                      id="patientEmail"
-                      name="patientEmail"
-                      type="email"
-                      defaultValue="john.doe@example.com"
-                      required
-                    />
+                  <Select value={selectedSpecialty} onValueChange={setSelectedSpecialty}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Select specialty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {specialties.map((specialty) => (
+                        <SelectItem key={specialty.value} value={specialty.value}>
+                          {specialty.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Doctors Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+                {filteredDoctors.map((doctor) => (
+                  <Card key={doctor.id} className="cursor-pointer hover:shadow-lg transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-start space-x-4">
+                        <Avatar className="w-16 h-16">
+                          <AvatarImage src={doctor.image} alt={doctor.name} />
+                          <AvatarFallback>
+                            {doctor.name.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-lg text-gray-900 dark:text-white truncate">
+                            {doctor.name}
+                          </h3>
+                          <p className="text-blue-600 font-medium">{doctor.specialty}</p>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <div className="flex items-center">
+                              <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                              <span className="text-sm font-medium ml-1">{doctor.rating}</span>
+                              <span className="text-sm text-gray-500 ml-1">({doctor.totalReviews})</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+                            <div className="flex items-center">
+                              <User className="h-3 w-3 mr-1" />
+                              <span>{doctor.experience}</span>
+                            </div>
+                            <div className="flex items-center">
+                              <DollarSign className="h-3 w-3 mr-1" />
+                              <span>${doctor.consultationFee}</span>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 line-clamp-2">
+                            {doctor.about}
+                          </p>
+                          <div className="flex items-center justify-between mt-3">
+                            <div className="flex items-center space-x-1">
+                              <Languages className="h-3 w-3 text-gray-400" />
+                              <span className="text-xs text-gray-500">
+                                {doctor.languages.join(', ')}
+                              </span>
+                            </div>
+                            <Button 
+                              size="sm" 
+                              onClick={() => handleDoctorSelect(doctor)}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              Select Doctor
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {filteredDoctors.length === 0 && (
+                <div className="text-center py-8">
+                  <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">No doctors found matching your criteria</p>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+
+          {/* Appointment Form Dialog */}
+          <Dialog open={isAppointmentFormOpen} onOpenChange={setIsAppointmentFormOpen}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setIsAppointmentFormOpen(false)
+                      setIsDoctorListOpen(true)
+                    }}
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                  <div>
+                    <DialogTitle>Book Appointment</DialogTitle>
+                    <DialogDescription>
+                      {selectedDoctor && `Schedule your consultation with ${selectedDoctor.name}`}
+                    </DialogDescription>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="appointmentDate">Date</Label>
-                    <Input
-                      id="appointmentDate"
-                      name="appointmentDate"
-                      type="date"
-                      min={new Date().toISOString().split("T")[0]}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="appointmentTime">Time</Label>
-                    <Input id="appointmentTime" name="appointmentTime" type="time" required />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reason">Reason for Visit</Label>
-                  <Input id="reason" name="reason" placeholder="General consultation" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="symptoms">Symptoms (Optional)</Label>
-                  <Textarea
-                    id="symptoms"
-                    name="symptoms"
-                    placeholder="Please describe your symptoms or reason for the appointment..."
-                    rows={3}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isBooking}>
-                  {isBooking ? "Booking..." : "Book Appointment"}
-                </Button>
-              </form>
+              </DialogHeader>
+
+              {selectedDoctor && (
+                <>
+                  {/* Doctor Info */}
+                  <Card className="mb-4">
+                    <CardContent className="p-4">
+                      <div className="flex items-center space-x-4">
+                        <Avatar className="w-12 h-12">
+                          <AvatarImage src={selectedDoctor.image} alt={selectedDoctor.name} />
+                          <AvatarFallback>
+                            {selectedDoctor.name.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <h3 className="font-semibold text-lg">{selectedDoctor.name}</h3>
+                          <p className="text-blue-600">{selectedDoctor.specialty}</p>
+                          <div className="flex items-center space-x-4 text-sm text-gray-600">
+                            <span>Fee: ${selectedDoctor.consultationFee}</span>
+                            <div className="flex items-center">
+                              <Star className="h-3 w-3 text-yellow-400 fill-current mr-1" />
+                              <span>{selectedDoctor.rating}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Appointment Form */}
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      handleBookAppointment(new FormData(e.currentTarget))
+                    }}
+                    className="space-y-4"
+                  >
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="patientName">Full Name</Label>
+                        <Input id="patientName" name="patientName" defaultValue="John Doe" required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="patientEmail">Email</Label>
+                        <Input
+                          id="patientEmail"
+                          name="patientEmail"
+                          type="email"
+                          defaultValue="john.doe@example.com"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="patientPhone">Phone Number</Label>
+                      <Input
+                        id="patientPhone"
+                        name="patientPhone"
+                        type="tel"
+                        placeholder="+1 (555) 123-4567"
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="appointmentDate">Date</Label>
+                        <Input
+                          id="appointmentDate"
+                          name="appointmentDate"
+                          type="date"
+                          min={new Date().toISOString().split("T")[0]}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="appointmentTime">Time</Label>
+                        <Input id="appointmentTime" name="appointmentTime" type="time" required />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="reason">Reason for Visit</Label>
+                      <Input id="reason" name="reason" placeholder="General consultation" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="symptoms">Symptoms (Optional)</Label>
+                      <Textarea
+                        id="symptoms"
+                        name="symptoms"
+                        placeholder="Please describe your symptoms or reason for the appointment..."
+                        rows={3}
+                      />
+                    </div>
+                    <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">Consultation Fee:</span>
+                        <span className="text-lg font-bold text-green-600">${selectedDoctor.consultationFee}</span>
+                      </div>
+                    </div>
+                    <Button type="submit" className="w-full" disabled={isBooking}>
+                      {isBooking ? "Booking..." : `Book Appointment - $${selectedDoctor.consultationFee}`}
+                    </Button>
+                  </form>
+                </>
+              )}
             </DialogContent>
           </Dialog>
         </div>
@@ -246,10 +487,9 @@ export default function AppointmentsPage() {
                 <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Appointments Yet</h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  You haven't booked any appointments yet. Book your first consultation with our AI-powered medical
-                  assistant.
+                  You haven't booked any appointments yet. Book your first consultation with our qualified doctors.
                 </p>
-                <Button onClick={() => setIsBookingDialogOpen(true)}>
+                <Button onClick={() => setIsDoctorListOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Book Your First Appointment
                 </Button>
