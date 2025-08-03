@@ -121,7 +121,23 @@ export async function POST(request: NextRequest) {
 
     // Send email notification to doctor
     try {
-      await sendEmailNotification(newAppointment)
+      // Send email using the new email API
+      const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/notifications/email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'appointmentRequest',
+          appointment: newAppointment
+        })
+      })
+
+      if (emailResponse.ok) {
+        console.log("Email notification sent successfully")
+      } else {
+        console.error("Failed to send email notification")
+      }
     } catch (emailError) {
       console.error("Failed to send email notification:", emailError)
       // Don't fail the appointment booking if email fails
