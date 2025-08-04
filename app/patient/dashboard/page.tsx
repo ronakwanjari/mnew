@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { saveVitals } from "@/lib/database"
 import {
   Activity,
   Heart,
@@ -42,12 +43,29 @@ export default function PatientDashboard() {
         }))
       }, 3000)
 
-      return () => clearInterval(interval)
+      // Save vitals to database every 30 seconds
+      const saveInterval = setInterval(async () => {
+        try {
+          await saveVitals({
+            patient_id: "patient_123", // In real app, get from user session
+            heart_rate: Math.round(vitals.heartRate),
+            spo2: Math.round(vitals.spO2),
+            temperature: Number(vitals.temperature.toFixed(1)),
+            bmi: Number(vitals.bmi.toFixed(1))
+          })
+        } catch (error) {
+          console.error("Error saving vitals:", error)
+        }
+      }, 30000)
+      return () => {
+        clearInterval(interval)
+        clearInterval(saveInterval)
+      }
     } catch (err) {
       setError("Error updating vital signs")
       console.error("Vitals update error:", err)
     }
-  }, [])
+  }, [vitals])
 
   const getVitalStatus = (vital: string, value: number) => {
     try {

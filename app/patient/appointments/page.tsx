@@ -466,11 +466,11 @@ export default function AppointmentsPage() {
                     <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                       <div className="flex justify-between items-center">
                         <span className="font-medium">Consultation Fee:</span>
-                        <span className="text-lg font-bold text-green-600">${selectedDoctor.consultationFee}</span>
+                        <span className="text-lg font-bold text-green-600">${selectedDoctor.consultation_fee}</span>
                       </div>
                     </div>
                     <Button type="submit" className="w-full" disabled={isBooking}>
-                      {isBooking ? "Booking..." : `Book Appointment - $${selectedDoctor.consultationFee}`}
+                      {isBooking ? "Booking..." : `Book Appointment - $${selectedDoctor.consultation_fee}`}
                     </Button>
                   </form>
                 </>

@@ -1,23 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { saveVitals, getVitals } from "@/lib/database"
 
-// Mock database for vitals
-const vitalsData: any[] = []
 
 export async function POST(req: NextRequest) {
   try {
     const { patientId, heartRate, spO2, temperature, bmi } = await req.json()
 
-    const vitalRecord = {
-      id: Date.now().toString(),
-      patientId,
-      heartRate,
-      spO2,
+    const vitalData = {
+      patient_id: patientId,
+      heart_rate: heartRate,
+      spo2: spO2,
       temperature,
       bmi,
-      timestamp: new Date().toISOString(),
     }
 
-    vitalsData.push(vitalRecord)
+    const vitalRecord = await saveVitals(vitalData)
 
     return NextResponse.json({
       success: true,
@@ -25,18 +22,31 @@ export async function POST(req: NextRequest) {
     })
   } catch (error) {
     console.error("Error saving vitals:", error)
-    return NextResponse.json({ error: "Failed to save vitals data" }, { status: 500 })
+    return NextResponse.json({ 
+      error: error instanceof Error ? error.message : "Failed to save vitals data" 
+    }, { status: 500 })
   }
 }
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url)
-  const patientId = searchParams.get("patientId")
+  try {
+    const { searchParams } = new URL(req.url)
+    const patientId = searchParams.get("patientId")
 
-  let filteredData = vitalsData
-  if (patientId) {
-    filteredData = vitalsData.filter((record) => record.patientId === patientId)
+    if (!patientId) {
+      return NextResponse.json({ error: "Patient ID is required" }, { status: 400 })
+    }
+
+    const vitals = await getVitals(patientId)
+
+    return NextResponse.json({ 
+      success: true,
+      vitals 
+    })
+  } catch (error) {
+    console.error("Error fetching vitals:", error)
+    return NextResponse.json({ 
+      error: error instanceof Error ? error.message : "Failed to fetch vitals" 
+    }, { status: 500 })
   }
-
-  return NextResponse.json({ vitals: filteredData })
 }

@@ -1,35 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { createAppointment } from "@/lib/database"
 
-// Mock database for appointments
-const appointments: Array<{
-  id: string
-  patientId: string
-  patientName: string
-  patientEmail: string
-  patientPhone: string
-  doctorId: string
-  doctorName: string
-  doctorEmail: string
-  appointmentDate: string
-  appointmentTime: string
-  reason: string
-  symptoms: string
-  status: "pending" | "confirmed" | "rejected" | "completed" | "cancelled"
-  consultationFee: number
-  meetingLink?: string
-  createdAt: string
-  updatedAt: string
-}> = []
-
-// Helper function to generate unique IDs
-function generateId(): string {
-  return Math.random().toString(36).substr(2, 9)
-}
-
-// Helper function to generate meeting link
-function generateMeetingLink(appointmentId: string): string {
-  return `https://medibot-meet.com/room/${appointmentId}`
-}
 
 // Helper function to send email notification (mock)
 async function sendEmailNotification(appointment: any) {
@@ -91,17 +62,130 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate appointment ID and meeting link
-    const appointmentId = generateId()
-    const meetingLink = generateMeetingLink(appointmentId)
+    // Create appointment data
+    const appointmentData = {
+      patient_id: body.patientId || crypto.randomUUID(),
+      patient_name: patientName.trim(),
+      patient_email: patientEmail.trim().toLowerCase(),
+      patient_phone: patientPhone || "",
+      doctor_id: doctorId,
+      doctor_name: doctorName,
+      doctor_email: doctorEmail,
+      appointment_date: appointmentDate,
+      appointment_time: appointmentTime,
+      reason: reason.trim(),
+      symptoms: symptoms?.trim() || "",
+      status: "pending" as const,
+      consultation_fee: consultationFee || 0,
+    }
 
-    // Create new appointment
-    const newAppointment = {
-      id: appointmentId,
-      patientId: body.patientId || generateId(),
-      patientName: patientName.trim(),
-      patientEmail: patientEmail.trim().toLowerCase(),
-      patientPhone: patientPhone || "",
+    // Save to database
+    const newAppointment = await createAppointment(appointmentData)
+
+    // Generate meeting link
+    const meetingLink = `https://medibot-meet.com/room/${newAppointment.id}`
+    
+    // Update appointment with meeting link
+    const { data: updatedAppointment, error: updateError } = await supabase
+      .from('appointments')
+      .update({ meeting_link: meetingLink })
+      .eq('id', newAppointment.id)
+      .select()
+      .single()
+
+    if (updateError) {
+      console.error("Error updating meeting link:", updateError)
+    }
+
+    const finalAppointment = updatedAppointment || { ...newAppointment, meeting_link: meetingLink }
+
+    // Send email notification to doctor
+    try {
+      const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/notifications/email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'appointmentRequest',
+          appointment: finalAppointment
+        })
+      })
+
+      if (emailResponse.ok) {
+        console.log("Email notification sent successfully")
+      } else {
+        console.error("Failed to send email notification")
+      }
+    } catch (emailError) {
+      console.error("Failed to send email notification:", emailError)
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Appointment booked successfully! The doctor will be notified via email.",
+        appointment: {
+          id: finalAppointment.id,
+          doctor_name: finalAppointment.doctor_name,
+          appointment_date: finalAppointment.appointment_date,
+          appointment_time: finalAppointment.appointment_time,
+          status: finalAppointment.status,
+          meeting_link: finalAppointment.meeting_link
+        },
+      },
+      { status: 201 }
+    )
+  } catch (error) {
+    console.error("Error booking appointment:", error)
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+        message: error instanceof Error ? error.message : "Failed to book appointment",
+      },
+      { status: 500 }
+    )
+  }
+}
+
+// GET - Get appointment by ID
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const appointmentId = searchParams.get("id")
+
+    if (!appointmentId) {
+      return NextResponse.json(
+        { error: "Appointment ID is required" },
+        { status: 400 }
+      )
+    }
+
+    const { data: appointment, error } = await supabase
+      .from('appointments')
+      .select('*')
+      .eq('id', appointmentId)
+      .single()
+
+    if (error || !appointment) {
+      return NextResponse.json(
+        { error: "Appointment not found" },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      appointment
+    })
+  } catch (error) {
+    console.error("Error fetching appointment:", error)
+    return NextResponse.json(
+      { error: "Failed to fetch appointment" },
+      { status: 500 }
+    )
+  }
+}
       doctorId,
       doctorName,
       doctorEmail,

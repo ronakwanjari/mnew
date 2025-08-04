@@ -1,45 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { supabase } from "@/lib/supabase"
+import { updateAppointment } from "@/lib/database"
 
-// Mock database for appointments - in production, use a real database
-let appointments: Array<{
-  id: string
-  patientId: string
-  patientName: string
-  patientEmail: string
-  patientPhone?: string
-  doctorId?: string
-  doctorName?: string
-  doctorEmail?: string
-  appointmentDate: string
-  appointmentTime: string
-  reason: string
-  symptoms: string
-  status: "pending" | "approved" | "rejected" | "completed"
-  consultationFee?: number
-  meetingLink?: string
-  createdAt: string
-  updatedAt: string
-}> = [
-  {
-    id: "apt_001",
-    patientId: "patient_123",
-    patientName: "John Doe",
-    patientEmail: "john.doe@example.com",
-    patientPhone: "+1 (555) 123-4567",
-    doctorId: "1",
-    doctorName: "Dr. Sarah Johnson",
-    doctorEmail: "sarah.johnson@medibot.com",
-    appointmentDate: "2024-01-25",
-    appointmentTime: "14:00",
-    reason: "General consultation",
-    symptoms: "Persistent headache and fatigue",
-    status: "pending",
-    consultationFee: 150,
-    meetingLink: "https://medibot-meet.com/room/apt_001",
-    createdAt: "2024-01-20T10:00:00.000Z",
-    updatedAt: "2024-01-20T10:00:00.000Z"
-  }
-]
 
 // GET - Fetch specific appointment by ID
 export async function GET(
@@ -48,9 +10,14 @@ export async function GET(
 ) {
   try {
     const appointmentId = params.id
-    const appointment = appointments.find(apt => apt.id === appointmentId)
+    
+    const { data: appointment, error } = await supabase
+      .from('appointments')
+      .select('*')
+      .eq('id', appointmentId)
+      .single()
 
-    if (!appointment) {
+    if (error || !appointment) {
       return NextResponse.json(
         { error: "Appointment not found" },
         { status: 404 }
@@ -80,38 +47,28 @@ export async function PUT(
     const body = await request.json()
     const { status, doctorNotes, meetingLink } = body
 
-    const appointmentIndex = appointments.findIndex(apt => apt.id === appointmentId)
-    
-    if (appointmentIndex === -1) {
-      return NextResponse.json(
-        { error: "Appointment not found" },
-        { status: 404 }
-      )
-    }
-
-    // Update appointment
-    appointments[appointmentIndex] = {
-      ...appointments[appointmentIndex],
+    const updates: any = {
       status,
-      ...(doctorNotes && { doctorNotes }),
-      ...(meetingLink && { meetingLink }),
-      updatedAt: new Date().toISOString()
     }
+    
+    if (doctorNotes) updates.doctor_notes = doctorNotes
+    if (meetingLink) updates.meeting_link = meetingLink
 
-    // Send notification to patient (mock)
-    const appointment = appointments[appointmentIndex]
-    console.log(`Sending notification to patient: ${appointment.patientEmail}`)
+    const updatedAppointment = await updateAppointment(appointmentId, updates)
+
+    // Send notification to patient
+    console.log(`Sending notification to patient: ${updatedAppointment.patient_email}`)
     console.log(`Appointment ${status}: ${appointmentId}`)
 
     return NextResponse.json({
       success: true,
       message: `Appointment ${status} successfully`,
-      appointment: appointments[appointmentIndex]
+      appointment: updatedAppointment
     })
   } catch (error) {
     console.error("Error updating appointment:", error)
     return NextResponse.json(
-      { error: "Failed to update appointment" },
+      { error: error instanceof Error ? error.message : "Failed to update appointment" },
       { status: 500 }
     )
   }
@@ -124,21 +81,26 @@ export async function DELETE(
 ) {
   try {
     const appointmentId = params.id
-    const appointmentIndex = appointments.findIndex(apt => apt.id === appointmentId)
     
-    if (appointmentIndex === -1) {
+    const { data: appointment, error } = await supabase
+      .from('appointments')
+      .delete()
+      .eq('id', appointmentId)
+      .select()
+      .single()
+    
+    if (error || !appointment) {
       return NextResponse.json(
         { error: "Appointment not found" },
         { status: 404 }
       )
     }
 
-    const deletedAppointment = appointments.splice(appointmentIndex, 1)[0]
 
     return NextResponse.json({
       success: true,
       message: "Appointment cancelled successfully",
-      appointment: deletedAppointment
+      appointment
     })
   } catch (error) {
     console.error("Error cancelling appointment:", error)

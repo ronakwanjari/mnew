@@ -1,30 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { createAppointment, getAppointments } from "@/lib/database"
 
-// Mock database - in production, use a real database
-let appointments: Array<{
-  id: string
-  patientId: string
-  patientName: string
-  patientEmail: string
-  patientPhone?: string
-  doctorId?: string
-  doctorName?: string
-  doctorEmail?: string
-  appointmentDate: string
-  appointmentTime: string
-  reason: string
-  symptoms: string
-  status: "pending" | "approved" | "rejected" | "completed"
-  consultationFee?: number
-  meetingLink?: string
-  createdAt: string
-  updatedAt: string
-}> = []
-
-// Helper function to generate unique IDs
-function generateId(): string {
-  return Math.random().toString(36).substr(2, 9)
-}
 
 // Helper function to validate appointment data
 function validateAppointmentData(data: any) {
@@ -78,29 +54,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: validation.message }, { status: 400 })
     }
 
-    // Create new appointment
-    const newAppointment = {
-      id: generateId(),
-      patientId: body.patientId || generateId(),
-      patientName: body.patientName.trim(),
-      patientEmail: body.patientEmail.trim().toLowerCase(),
-      patientPhone: body.patientPhone?.trim() || "",
-      doctorId: body.doctorId || null,
-      doctorName: body.doctorName || null,
-      doctorEmail: body.doctorEmail || null,
-      appointmentDate: body.appointmentDate,
-      appointmentTime: body.appointmentTime,
+    // Create appointment data
+    const appointmentData = {
+      patient_id: body.patientId || crypto.randomUUID(),
+      patient_name: body.patientName.trim(),
+      patient_email: body.patientEmail.trim().toLowerCase(),
+      patient_phone: body.patientPhone?.trim() || "",
+      doctor_id: body.doctorId || null,
+      doctor_name: body.doctorName || null,
+      doctor_email: body.doctorEmail || null,
+      appointment_date: body.appointmentDate,
+      appointment_time: body.appointmentTime,
       reason: body.reason.trim(),
       symptoms: body.symptoms?.trim() || "",
       status: "pending" as const,
-      consultationFee: body.consultationFee || 0,
-      meetingLink: body.meetingLink || null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      consultation_fee: body.consultationFee || 0,
     }
 
-    // Add to mock database
-    appointments.push(newAppointment)
+    // Save to database
+    const newAppointment = await createAppointment(appointmentData)
 
     console.log("Appointment created successfully:", newAppointment.id)
 
@@ -117,7 +89,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: "Internal server error",
-        message: "Failed to create appointment",
+        message: error instanceof Error ? error.message : "Failed to create appointment",
       },
       { status: 500 },
     )
@@ -134,39 +106,25 @@ export async function GET(request: NextRequest) {
     const doctorId = searchParams.get("doctorId")
     const status = searchParams.get("status")
 
-    let filteredAppointments = [...appointments]
+    const appointments = await getAppointments(
+      patientId || undefined,
+      doctorId || undefined,
+      status || undefined
+    )
 
-    // Filter by patient ID
-    if (patientId) {
-      filteredAppointments = filteredAppointments.filter((apt) => apt.patientId === patientId)
-    }
-
-    // Filter by doctor ID
-    if (doctorId) {
-      filteredAppointments = filteredAppointments.filter((apt) => apt.doctorId === doctorId)
-    }
-
-    // Filter by status
-    if (status) {
-      filteredAppointments = filteredAppointments.filter((apt) => apt.status === status)
-    }
-
-    // Sort by creation date (newest first)
-    filteredAppointments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-
-    console.log(`Found ${filteredAppointments.length} appointments`)
+    console.log(`Found ${appointments.length} appointments`)
 
     return NextResponse.json({
       success: true,
-      appointments: filteredAppointments,
-      total: filteredAppointments.length,
+      appointments,
+      total: appointments.length,
     })
   } catch (error) {
     console.error("Error fetching appointments:", error)
     return NextResponse.json(
       {
         error: "Internal server error",
-        message: "Failed to fetch appointments",
+        message: error instanceof Error ? error.message : "Failed to fetch appointments",
       },
       { status: 500 },
     )
