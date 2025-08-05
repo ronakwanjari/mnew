@@ -76,10 +76,33 @@ export async function POST(request: NextRequest) {
 
     console.log("Appointment created successfully:", newAppointment.id)
 
+    // Send real-time email notification to doctor if doctor is specified
+    if (appointmentData.doctor_email) {
+      try {
+        const emailResponse = await fetch(`${request.nextUrl.origin}/api/notifications/email`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: "appointmentRequest",
+            appointment: newAppointment,
+          }),
+        })
+
+        if (emailResponse.ok) {
+          console.log("Real-time email notification sent to doctor successfully")
+        } else {
+          console.error("Failed to send email notification to doctor")
+        }
+      } catch (emailError) {
+        console.error("Error sending email notification:", emailError)
+      }
+    }
     return NextResponse.json(
       {
         success: true,
-        message: "Appointment booked successfully",
+        message: "Appointment booked successfully. Doctor notified via email in real-time.",
         appointment: newAppointment,
       },
       { status: 201 },

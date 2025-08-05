@@ -52,6 +52,7 @@ const emailTemplates = {
               })}</p>
               <p><strong>Time:</strong> ${appointment.appointmentTime}</p>
               <p><strong>Consultation Fee:</strong> $${appointment.consultationFee}</p>
+              ${appointment.doctorName ? `<p><strong>Requested Doctor:</strong> ${appointment.doctorName}</p>` : ''}
             </div>
 
             <div class="appointment-details">
@@ -69,7 +70,7 @@ const emailTemplates = {
               </a>
             </div>
 
-            <p><strong>Meeting Link:</strong> <a href="${appointment.meetingLink}">${appointment.meetingLink}</a></p>
+            ${appointment.meetingLink ? `<p><strong>Meeting Link:</strong> <a href="${appointment.meetingLink}">${appointment.meetingLink}</a></p>` : ''}
             
             <p>Please log in to your doctor dashboard to manage this appointment request.</p>
             
@@ -120,10 +121,11 @@ const emailTemplates = {
               })}</p>
               <p><strong>Time:</strong> ${appointment.appointmentTime}</p>
               <p><strong>Consultation Fee:</strong> $${appointment.consultationFee}</p>
+              <p><strong>Appointment ID:</strong> #${appointment.id}</p>
             </div>
 
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${appointment.meetingLink}" class="button">
+              <a href="${appointment.meetingLink || `https://medibot-meet.com/room/${appointment.id}`}" class="button">
                 🎥 Join Video Consultation
               </a>
             </div>
@@ -135,6 +137,13 @@ const emailTemplates = {
               <li>Have your medical history and current medications ready</li>
               <li>If you need to reschedule, please contact us at least 24 hours in advance</li>
             </ul>
+            
+            <div class="appointment-details">
+              <h3>👨‍⚕️ Doctor Information</h3>
+              <p><strong>Name:</strong> ${appointment.doctorName}</p>
+              <p><strong>Email:</strong> ${appointment.doctorEmail}</p>
+              <p><strong>Specialty:</strong> ${appointment.doctorSpecialty || 'General Medicine'}</p>
+            </div>
             
             <hr style="margin: 20px 0;">
             <p style="font-size: 12px; color: #666;">
@@ -156,8 +165,8 @@ async function sendEmail(emailData: EmailData): Promise<{ success: boolean; mess
     console.log("📧 Subject:", emailData.subject)
     console.log("📧 Email content length:", emailData.html.length)
     
-    // Simulate email sending delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Simulate real-time email sending (minimal delay)
+    await new Promise(resolve => setTimeout(resolve, 100))
     
     // Mock successful response
     return {

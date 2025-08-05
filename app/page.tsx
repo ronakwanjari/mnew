@@ -104,6 +104,7 @@ export default function HomePage() {
       const appointmentData = {
         patientName: formData.get("patientName") as string,
         patientEmail: formData.get("patientEmail") as string,
+        patientPhone: formData.get("patientPhone") as string,
         appointmentDate: formData.get("appointmentDate") as string,
         appointmentTime: formData.get("appointmentTime") as string,
         reason: formData.get("reason") as string,
@@ -124,7 +125,7 @@ export default function HomePage() {
       if (response.ok && data.success) {
         toast({
           title: "Appointment Booked! 🎉",
-          description: "Your appointment has been scheduled successfully.",
+          description: "Your appointment has been scheduled successfully. Doctor notified via email in real-time.",
         })
         setIsBookingOpen(false)
       } else {
@@ -194,6 +195,16 @@ export default function HomePage() {
                           required
                         />
                       </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="patientPhone">Phone Number</Label>
+                      <Input
+                        id="patientPhone"
+                        name="patientPhone"
+                        type="tel"
+                        placeholder="+1 (555) 123-4567"
+                        required
+                      />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">

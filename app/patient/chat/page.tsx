@@ -166,6 +166,7 @@ export default function ChatPage() {
       const appointmentData = {
         patientName: "John Doe", // In real app, get from user session
         patientEmail: "john.doe@example.com", // In real app, get from user session
+        patientPhone: "+1 (555) 123-4567", // In real app, get from user session
         appointmentDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split("T")[0], // Tomorrow
         appointmentTime: "10:00", // Default time
         reason: "AI Chat Consultation",
@@ -191,13 +192,13 @@ export default function ChatPage() {
       if (response.ok && data.success) {
         toast({
           title: "Appointment Request Sent! 🎉",
-          description: "A doctor will review your case and contact you soon via email.",
+          description: "Doctor has been notified via email in real-time. You'll receive confirmation shortly.",
         })
 
         const confirmationMessage: Message = {
           id: Date.now().toString(),
           content:
-            "Perfect! 🎉 I've sent your appointment request to our medical team. Here's what happens next:\n\n✅ A qualified doctor will review your symptoms and medical history\n📧 You'll receive an email confirmation within 15-30 minutes\n📞 The doctor will contact you to schedule a convenient time\n💬 You can communicate via message, phone, or video call\n\nIn the meantime, please rest and take care of yourself. If your symptoms worsen or you feel it's urgent, don't hesitate to seek immediate medical attention! 🏥",
+            "Perfect! 🎉 I've sent your appointment request to our medical team in real-time. Here's what happens next:\n\n✅ A qualified doctor has been notified immediately via email\n📧 You'll receive an email confirmation within 5-10 minutes once approved\n📞 The doctor will review and respond quickly\n💬 You can communicate via message, phone, or video call\n\nBoth you and the doctor will receive real-time email notifications throughout the process. If your symptoms worsen or you feel it's urgent, don't hesitate to seek immediate medical attention! 🏥",
           sender: "bot",
           timestamp: new Date(),
         }

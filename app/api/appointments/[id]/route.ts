@@ -56,9 +56,29 @@ export async function PUT(
 
     const updatedAppointment = await updateAppointment(appointmentId, updates)
 
-    // Send notification to patient
-    console.log(`Sending notification to patient: ${updatedAppointment.patient_email}`)
-    console.log(`Appointment ${status}: ${appointmentId}`)
+    // Send real-time email notification to patient
+    if (status === "approved") {
+      try {
+        const emailResponse = await fetch(`${request.nextUrl.origin}/api/notifications/email`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: "appointmentConfirmation",
+            appointment: updatedAppointment,
+          }),
+        })
+
+        if (emailResponse.ok) {
+          console.log("Confirmation email sent to patient successfully")
+        } else {
+          console.error("Failed to send confirmation email to patient")
+        }
+      } catch (emailError) {
+        console.error("Error sending confirmation email:", emailError)
+      }
+    }
 
     return NextResponse.json({
       success: true,

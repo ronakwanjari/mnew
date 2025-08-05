@@ -62,15 +62,43 @@ export default function DoctorDashboard() {
   const { toast } = useToast()
 
   const handleAppointmentAction = (appointmentId: number, action: "approve" | "reject") => {
+    const appointment = appointments.find(apt => apt.id === appointmentId)
+    if (!appointment) return
+
+    // Update local state
     setAppointments((prev) =>
       prev.map((apt) =>
         apt.id === appointmentId ? { ...apt, status: action === "approve" ? "approved" : "rejected" } : apt,
       ),
     )
 
+    // Send API request to update appointment and trigger email
+    fetch(`/api/appointments/${appointmentId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        status: action === "approve" ? "approved" : "rejected",
+        doctorNotes: action === "reject" ? "Doctor is not available at the requested time" : "Appointment confirmed",
+        meetingLink: action === "approve" ? `https://medibot-meet.com/room/${appointmentId}` : null
+      }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log("Appointment updated and email sent successfully")
+      } else {
+        console.error("Failed to update appointment:", data.error)
+      }
+    })
+    .catch(error => {
+      console.error("Error updating appointment:", error)
+    })
+
     toast({
       title: action === "approve" ? "Appointment Approved" : "Appointment Rejected",
-      description: `Patient will be notified via email about the ${action === "approve" ? "approval" : "rejection"}.`,
+      description: `Patient will be notified via email about the ${action === "approve" ? "approval" : "rejection"}. Email sent in real-time.`,
     })
   }
 

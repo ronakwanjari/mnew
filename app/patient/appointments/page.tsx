@@ -49,6 +49,7 @@ interface Doctor {
   totalReviews: number
   image: string
   status: string
+  license_number?: string
 }
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
@@ -298,6 +299,9 @@ export default function AppointmentsPage() {
                             {doctor.name}
                           </h3>
                           <p className="text-blue-600 font-medium">{doctor.specialty}</p>
+                          {doctor.license_number && (
+                            <p className="text-xs text-gray-500">License: {doctor.license_number}</p>
+                          )}
                           <div className="flex items-center space-x-2 mt-1">
                             <div className="flex items-center">
                               <Star className="h-4 w-4 text-yellow-400 fill-current" />
@@ -315,6 +319,11 @@ export default function AppointmentsPage() {
                               <span>${doctor.consultationFee}</span>
                             </div>
                           </div>
+                          {doctor.education && (
+                            <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                              🎓 {doctor.education}
+                            </p>
+                          )}
                           <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 line-clamp-2">
                             {doctor.about}
                           </p>
@@ -388,11 +397,27 @@ export default function AppointmentsPage() {
                         <div>
                           <h3 className="font-semibold text-lg">{selectedDoctor.name}</h3>
                           <p className="text-blue-600">{selectedDoctor.specialty}</p>
+                          {selectedDoctor.license_number && (
+                            <p className="text-xs text-gray-500">License: {selectedDoctor.license_number}</p>
+                          )}
+                          {selectedDoctor.education && (
+                            <p className="text-xs text-gray-600 mt-1">🎓 {selectedDoctor.education}</p>
+                          )}
                           <div className="flex items-center space-x-4 text-sm text-gray-600">
                             <span>Fee: ${selectedDoctor.consultationFee}</span>
                             <div className="flex items-center">
                               <Star className="h-3 w-3 text-yellow-400 fill-current mr-1" />
                               <span>{selectedDoctor.rating}</span>
+                            </div>
+                            <span>{selectedDoctor.experience}</span>
+                          </div>
+                          <div className="mt-2">
+                            <p className="text-sm text-gray-600">{selectedDoctor.about}</p>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <Languages className="h-3 w-3 text-gray-400" />
+                              <span className="text-xs text-gray-500">
+                                Languages: {selectedDoctor.languages.join(', ')}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -466,11 +491,11 @@ export default function AppointmentsPage() {
                     <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                       <div className="flex justify-between items-center">
                         <span className="font-medium">Consultation Fee:</span>
-                        <span className="text-lg font-bold text-green-600">${selectedDoctor.consultation_fee}</span>
+                        <span className="text-lg font-bold text-green-600">${selectedDoctor.consultationFee}</span>
                       </div>
                     </div>
                     <Button type="submit" className="w-full" disabled={isBooking}>
-                      {isBooking ? "Booking..." : `Book Appointment - $${selectedDoctor.consultation_fee}`}
+                      {isBooking ? "Booking..." : `Book Appointment - $${selectedDoctor.consultationFee}`}
                     </Button>
                   </form>
                 </>

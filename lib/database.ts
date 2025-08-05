@@ -24,7 +24,13 @@ export async function getDoctors(specialty?: string, search?: string) {
     throw new Error('Failed to fetch doctors')
   }
 
-  return data as Doctor[]
+  // Map database fields to frontend expected format
+  return (data || []).map(doctor => ({
+    ...doctor,
+    consultationFee: doctor.consultation_fee,
+    totalReviews: doctor.total_reviews,
+    licenseNumber: doctor.license_number
+  })) as Doctor[]
 }
 
 export async function getDoctorById(id: string) {
