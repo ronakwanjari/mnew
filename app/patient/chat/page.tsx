@@ -165,7 +165,7 @@ export default function ChatPage() {
       // Create appointment data with the correct field names expected by the API
       const appointmentData = {
         patientName: "John Doe", // In real app, get from user session
-        patientEmail: "john.doe@example.com", // In real app, get from user session
+        patientEmail: "ronakw.etc22@sbjit.edu.in", // Use your specified patient email
         patientPhone: "+1 (555) 123-4567", // In real app, get from user session
         appointmentDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split("T")[0], // Tomorrow
         appointmentTime: "10:00", // Default time
