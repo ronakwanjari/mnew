@@ -47,7 +47,7 @@ export default function PatientDashboard() {
       const saveInterval = setInterval(async () => {
         try {
           await saveVitals({
-            patient_id: "patient_123", // In real app, get from user session
+            patient_id: "patient_ronakw", // Use consistent patient ID
             heart_rate: Math.round(vitals.heartRate),
             spo2: Math.round(vitals.spO2),
             temperature: Number(vitals.temperature.toFixed(1)),
@@ -109,7 +109,7 @@ export default function PatientDashboard() {
         {/* Welcome Section */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome back, John!</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome back, Ronak!</h1>
             <p className="text-gray-600 dark:text-gray-300">Here's your health overview for today</p>
           </div>
           <div className="flex space-x-2">

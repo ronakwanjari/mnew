@@ -94,7 +94,7 @@ export function PatientLayout({ children }: PatientLayoutProps) {
                 <AvatarFallback>JD</AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">John Doe</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">Ronak W</p>
                 <p className="text-xs text-gray-500">Patient</p>
               </div>
               <Button variant="ghost" size="sm">

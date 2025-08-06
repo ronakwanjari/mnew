@@ -98,8 +98,8 @@ export default function LoginPage() {
                       id="patient-email"
                       name="email"
                       type="email"
-                      placeholder="patient@example.com"
-                      defaultValue="john.doe@example.com"
+                      placeholder="ronakw.etc22@sbjit.edu.in"
+                      defaultValue="ronakw.etc22@sbjit.edu.in"
                       required
                     />
                   </div>
@@ -115,7 +115,7 @@ export default function LoginPage() {
                   <p className="text-xs text-blue-700 dark:text-blue-300">
                     <strong>Demo Credentials:</strong>
                     <br />
-                    Email: john.doe@example.com
+                    Email: ronakw.etc22@sbjit.edu.in
                     <br />
                     Password: password123
                   </p>

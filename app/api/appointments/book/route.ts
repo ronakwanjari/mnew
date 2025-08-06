@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     // Create appointment data
     const appointmentData = {
-      patient_id: body.patientId || crypto.randomUUID(),
+      patient_id: body.patientId || "patient_ronakw",
       patient_name: body.patientName.trim(),
       patient_email: body.patientEmail.trim().toLowerCase(),
       patient_phone: body.patientPhone?.trim() || "",

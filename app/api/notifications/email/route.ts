@@ -38,7 +38,7 @@ const emailTemplates = {
             <div class="appointment-details">
               <h3>📋 Patient Information</h3>
               <p><strong>Name:</strong> ${appointment.patientName}</p>
-              <p><strong>Email:</strong> ${appointment.patientEmail}</p>
+              <p><strong>Email:</strong> ronakw.etc22@sbjit.edu.in</p>
               <p><strong>Phone:</strong> ${appointment.patientPhone || 'Not provided'}</p>
             </div>
 
@@ -76,7 +76,7 @@ const emailTemplates = {
             
             <hr style="margin: 20px 0;">
             <p style="font-size: 12px; color: #666;">
-              This is an automated message from MEDIBOT. Please do not reply to this email.
+              This is a real-time automated message from MEDIBOT. Email sent instantly upon booking.
               <br>For support, contact us at support@medibot.com
             </p>
           </div>
@@ -147,7 +147,8 @@ const emailTemplates = {
             
             <hr style="margin: 20px 0;">
             <p style="font-size: 12px; color: #666;">
-              This is an automated message from MEDIBOT. For support, contact us at support@medibot.com
+              This is a real-time automated message from MEDIBOT. Email sent instantly upon approval.
+              <br>For support, contact us at support@medibot.com
             </p>
           </div>
         </div>
