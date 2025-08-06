@@ -24,7 +24,7 @@ export default function DoctorDashboard() {
     {
       id: 1,
       patientName: "Ronak W",
-      patientEmail: "ronakw.etc22@sbjit.edu.in",
+      patientEmail: "patient@example.com",
       symptoms: "Persistent headache and fatigue for 3 days. Pain level 6/10, affecting daily activities.",
       severity: "medium",
       requestedTime: "2024-01-22 14:00:00",
@@ -36,7 +36,7 @@ export default function DoctorDashboard() {
     {
       id: 2,
       patientName: "Ronak W",
-      patientEmail: "ronakw.etc22@sbjit.edu.in",
+      patientEmail: "patient@example.com",
       symptoms: "Chest pain and shortness of breath during exercise. Started yesterday evening.",
       severity: "high",
       requestedTime: "2024-01-22 10:30:00",
@@ -48,7 +48,7 @@ export default function DoctorDashboard() {
     {
       id: 3,
       patientName: "Ronak W",
-      patientEmail: "ronakw.etc22@sbjit.edu.in",
+      patientEmail: "patient@example.com",
       symptoms: "My 5-year-old has fever (101°F) and persistent cough for 2 days. Not eating well.",
       severity: "medium",
       requestedTime: "2024-01-23 16:00:00",

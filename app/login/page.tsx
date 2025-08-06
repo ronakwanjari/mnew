@@ -98,8 +98,8 @@ export default function LoginPage() {
                       id="patient-email"
                       name="email"
                       type="email"
-                      placeholder="ronakw.etc22@sbjit.edu.in"
-                      defaultValue="ronakw.etc22@sbjit.edu.in"
+                      placeholder="patient@example.com"
+                      defaultValue="patient@example.com"
                       required
                     />
                   </div>
@@ -115,7 +115,7 @@ export default function LoginPage() {
                   <p className="text-xs text-blue-700 dark:text-blue-300">
                     <strong>Demo Credentials:</strong>
                     <br />
-                    Email: ronakw.etc22@sbjit.edu.in
+                    Email: patient@example.com
                     <br />
                     Password: password123
                   </p>
@@ -142,7 +142,7 @@ export default function LoginPage() {
                       name="email"
                       type="email"
                       placeholder="doctor@medibot.com"
-                      defaultValue="dr.sarah@medibot.com"
+                      defaultValue="sujalt.etc22@sbjit.edu.in"
                       required
                     />
                   </div>
@@ -158,7 +158,7 @@ export default function LoginPage() {
                   <p className="text-xs text-green-700 dark:text-green-300">
                     <strong>Demo Credentials:</strong>
                     <br />
-                    Email: dr.sarah@medibot.com
+                    Email: sujalt.etc22@sbjit.edu.in
                     <br />
                     Password: doctor123
                   </p>

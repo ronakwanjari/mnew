@@ -38,7 +38,7 @@ const emailTemplates = {
             <div class="appointment-details">
               <h3>📋 Patient Information</h3>
               <p><strong>Name:</strong> ${appointment.patientName}</p>
-              <p><strong>Email:</strong> ronakw.etc22@sbjit.edu.in</p>
+              <p><strong>Email:</strong> ${appointment.patientEmail}</p>
               <p><strong>Phone:</strong> ${appointment.patientPhone || 'Not provided'}</p>
             </div>
 

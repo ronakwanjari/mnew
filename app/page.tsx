@@ -191,8 +191,8 @@ export default function HomePage() {
                           id="patientEmail"
                           name="patientEmail"
                           type="email"
-                          placeholder="ronakw.etc22@sbjit.edu.in"
-                          defaultValue="ronakw.etc22@sbjit.edu.in"
+                          placeholder="patient@example.com"
+                          defaultValue="patient@example.com"
                           required
                         />
                       </div>
