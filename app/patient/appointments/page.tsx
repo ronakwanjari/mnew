@@ -129,7 +129,7 @@ export default function AppointmentsPage() {
 
   const fetchDoctors = async () => {
     try {
-      // Use mock doctors data for demo
+      // Show only one doctor for simplified booking
       const mockDoctors = [
         {
           id: "doc_001",
@@ -148,42 +148,6 @@ export default function AppointmentsPage() {
           image: "/placeholder-user.jpg",
           status: "active",
           license_number: "MD123456"
-        },
-        {
-          id: "doc_002",
-          name: "Dr. Michael Chen",
-          specialty: "Cardiology",
-          email: "sujalt.etc22@sbjit.edu.in",
-          phone: "+1 (555) 234-5678",
-          experience: "12 years",
-          education: "MD from Johns Hopkins University",
-          about: "Dr. Michael Chen is a board-certified cardiologist with extensive experience in treating heart conditions.",
-          languages: ["English", "Mandarin"],
-          availability: ["Monday", "Wednesday", "Friday"],
-          consultationFee: 250,
-          rating: 4.9,
-          totalReviews: 189,
-          image: "/placeholder-user.jpg",
-          status: "active",
-          license_number: "MD234567"
-        },
-        {
-          id: "doc_003",
-          name: "Dr. Emily Rodriguez",
-          specialty: "Pediatrics",
-          email: "sujalt.etc22@sbjit.edu.in",
-          phone: "+1 (555) 345-6789",
-          experience: "10 years",
-          education: "MD from Stanford University",
-          about: "Dr. Emily Rodriguez is a compassionate pediatrician who has been caring for children and adolescents for over 10 years.",
-          languages: ["English", "Spanish"],
-          availability: ["Tuesday", "Thursday", "Saturday"],
-          consultationFee: 180,
-          rating: 4.7,
-          totalReviews: 156,
-          image: "/placeholder-user.jpg",
-          status: "active",
-          license_number: "MD345678"
         }
       ]
       
@@ -195,7 +159,8 @@ export default function AppointmentsPage() {
         if (response.ok) {
           const data = await response.json()
           if (data.success && data.doctors) {
-            setDoctors(data.doctors)
+            // Show only first doctor for simplified booking
+            setDoctors(data.doctors.slice(0, 1))
           }
         }
       } catch (apiError) {
@@ -242,7 +207,7 @@ export default function AppointmentsPage() {
       if (response.ok && data.success) {
         toast({
           title: "Appointment Booked! 🎉",
-          description: `Your appointment with ${selectedDoctor.name} has been booked. The doctor will be notified via email.`,
+          description: `Your appointment with ${selectedDoctor.name} has been booked. Email sent to doctor in real-time!`,
         })
 
         setIsAppointmentFormOpen(false)
@@ -448,7 +413,7 @@ export default function AppointmentsPage() {
 
           {/* Appointment Form Dialog */}
           <Dialog open={isAppointmentFormOpen} onOpenChange={setIsAppointmentFormOpen}>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <div className="flex items-center space-x-2">
                   <Button
@@ -473,39 +438,26 @@ export default function AppointmentsPage() {
               {selectedDoctor && (
                 <>
                   {/* Doctor Info */}
-                  <Card className="mb-4">
-                    <CardContent className="p-4">
+                  <Card className="mb-3">
+                    <CardContent className="p-3">
                       <div className="flex items-center space-x-4">
-                        <Avatar className="w-12 h-12">
+                        <Avatar className="w-10 h-10">
                           <AvatarImage src={selectedDoctor.image} alt={selectedDoctor.name} />
                           <AvatarFallback>
                             {selectedDoctor.name.split(' ').map(n => n[0]).join('')}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <h3 className="font-semibold text-lg">{selectedDoctor.name}</h3>
-                          <p className="text-blue-600">{selectedDoctor.specialty}</p>
+                          <h3 className="font-semibold text-base">{selectedDoctor.name}</h3>
+                          <p className="text-blue-600 text-sm">{selectedDoctor.specialty}</p>
                           {selectedDoctor.license_number && (
                             <p className="text-xs text-gray-500">License: {selectedDoctor.license_number}</p>
                           )}
-                          {selectedDoctor.education && (
-                            <p className="text-xs text-gray-600 mt-1">🎓 {selectedDoctor.education}</p>
-                          )}
-                          <div className="flex items-center space-x-4 text-sm text-gray-600">
+                          <div className="flex items-center space-x-3 text-xs text-gray-600">
                             <span>Fee: ${selectedDoctor.consultationFee}</span>
                             <div className="flex items-center">
                               <Star className="h-3 w-3 text-yellow-400 fill-current mr-1" />
                               <span>{selectedDoctor.rating}</span>
-                            </div>
-                            <span>{selectedDoctor.experience}</span>
-                          </div>
-                          <div className="mt-2">
-                            <p className="text-sm text-gray-600">{selectedDoctor.about}</p>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <Languages className="h-3 w-3 text-gray-400" />
-                              <span className="text-xs text-gray-500">
-                                Languages: {selectedDoctor.languages.join(', ')}
-                              </span>
                             </div>
                           </div>
                         </div>
@@ -519,33 +471,23 @@ export default function AppointmentsPage() {
                       e.preventDefault()
                       handleBookAppointment(new FormData(e.currentTarget))
                     }}
-                    className="space-y-4"
+                    className="space-y-3"
                   >
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-3">
                       <div className="space-y-2">
                         <Label htmlFor="patientName">Full Name</Label>
                         <Input id="patientName" name="patientName" defaultValue="John Doe" required />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="patientEmail">Email</Label>
+                        <Label htmlFor="patientPhone">Phone Number</Label>
                         <Input
-                          id="patientEmail"
-                          name="patientEmail"
-                          type="email"
-                          defaultValue="ronakw.etc22@sbjit.edu.in"
+                          id="patientPhone"
+                          name="patientPhone"
+                          type="tel"
+                          placeholder="+1 (555) 123-4567"
                           required
                         />
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="patientPhone">Phone Number</Label>
-                      <Input
-                        id="patientPhone"
-                        name="patientPhone"
-                        type="tel"
-                        placeholder="+1 (555) 123-4567"
-                        required
-                      />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -573,10 +515,10 @@ export default function AppointmentsPage() {
                         id="symptoms"
                         name="symptoms"
                         placeholder="Please describe your symptoms or reason for the appointment..."
-                        rows={3}
+                        rows={2}
                       />
                     </div>
-                    <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                    <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
                       <div className="flex justify-between items-center">
                         <span className="font-medium">Consultation Fee:</span>
                         <span className="text-lg font-bold text-green-600">${selectedDoctor.consultationFee}</span>

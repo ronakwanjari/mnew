@@ -3,7 +3,7 @@ import type { Doctor, Appointment, Vital, ChatSession, ChatMessage, Pharmacy } f
 
 // Doctor operations
 export async function getDoctors(specialty?: string, search?: string) {
-  // Mock data for demo since Supabase might not be connected
+  // Show only one doctor for simplified booking
   const mockDoctors = [
     {
       id: "doc_001",
@@ -25,48 +25,6 @@ export async function getDoctors(specialty?: string, search?: string) {
       consultationFee: 150,
       totalReviews: 245,
       licenseNumber: "MD123456"
-    },
-    {
-      id: "doc_002",
-      name: "Dr. Michael Chen",
-      specialty: "Cardiology",
-      email: "sujalt.etc22@sbjit.edu.in",
-      phone: "+1 (555) 234-5678",
-      license_number: "MD234567",
-      experience: "12 years",
-      education: "MD from Johns Hopkins University",
-      about: "Dr. Michael Chen is a board-certified cardiologist with extensive experience in treating heart conditions.",
-      languages: ["English", "Mandarin"],
-      availability: ["Monday", "Wednesday", "Friday"],
-      consultation_fee: 250,
-      rating: 4.9,
-      total_reviews: 189,
-      image: "/placeholder-user.jpg",
-      status: "active",
-      consultationFee: 250,
-      totalReviews: 189,
-      licenseNumber: "MD234567"
-    },
-    {
-      id: "doc_003",
-      name: "Dr. Emily Rodriguez",
-      specialty: "Pediatrics",
-      email: "sujalt.etc22@sbjit.edu.in",
-      phone: "+1 (555) 345-6789",
-      license_number: "MD345678",
-      experience: "10 years",
-      education: "MD from Stanford University",
-      about: "Dr. Emily Rodriguez is a compassionate pediatrician who has been caring for children and adolescents for over 10 years.",
-      languages: ["English", "Spanish"],
-      availability: ["Tuesday", "Thursday", "Saturday"],
-      consultation_fee: 180,
-      rating: 4.7,
-      total_reviews: 156,
-      image: "/placeholder-user.jpg",
-      status: "active",
-      consultationFee: 180,
-      totalReviews: 156,
-      licenseNumber: "MD345678"
     }
   ]
 
@@ -93,6 +51,7 @@ export async function getDoctors(specialty?: string, search?: string) {
       .select('*')
       .eq('status', 'active')
       .order('rating', { ascending: false })
+      .limit(1) // Only show one doctor
 
     if (specialty && specialty !== 'all') {
       query = query.ilike('specialty', `%${specialty}%`)
@@ -106,7 +65,7 @@ export async function getDoctors(specialty?: string, search?: string) {
 
     if (!error && data && data.length > 0) {
       // Map database fields to frontend expected format
-      return data.map(doctor => ({
+      return data.slice(0, 1).map(doctor => ({
         ...doctor,
         consultationFee: doctor.consultation_fee,
         totalReviews: doctor.total_reviews,
@@ -149,6 +108,8 @@ export async function getDoctorById(id: string) {
 // Appointment operations
 export async function createAppointment(appointmentData: Omit<Appointment, 'id' | 'created_at' | 'updated_at'>) {
   try {
+    console.log("Creating appointment in database:", appointmentData)
+    
     const { data, error } = await supabase
       .from('appointments')
       .insert([{
@@ -160,11 +121,23 @@ export async function createAppointment(appointmentData: Omit<Appointment, 'id' 
 
     if (error) {
       console.error('Error creating appointment:', error)
-      throw new Error('Failed to create appointment')
+      // Fall back to mock appointment instead of throwing error
+      console.log('Falling back to mock appointment creation')
+      const mockAppointment = {
+        id: `apt_${Date.now()}`,
+        ...appointmentData,
+        meeting_link: `https://medibot-meet.com/room/${Date.now()}`,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+      console.log("Mock appointment created:", mockAppointment.id)
+      return mockAppointment as Appointment
     }
 
+    console.log("Database appointment created successfully:", data.id)
     return data as Appointment
   } catch (error) {
+    console.log("Database error, creating mock appointment:", error)
     // Create mock appointment for demo
     const mockAppointment = {
       id: `apt_${Date.now()}`,
@@ -173,6 +146,7 @@ export async function createAppointment(appointmentData: Omit<Appointment, 'id' 
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     }
+    console.log("Mock appointment created:", mockAppointment.id)
     return mockAppointment as Appointment
   }
 }

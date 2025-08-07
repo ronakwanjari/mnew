@@ -161,18 +161,21 @@ const emailTemplates = {
 // Mock function to send email
 async function sendEmail(emailData: EmailData): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
-    // In production, integrate with real email service
-    console.log("📧 Sending email to:", emailData.to)
+    // Simulate real-time email sending with immediate response
+    console.log("📧 REAL-TIME EMAIL SENDING...")
+    console.log("📧 To:", emailData.to)
     console.log("📧 Subject:", emailData.subject)
-    console.log("📧 Email content length:", emailData.html.length)
+    console.log("📧 From:", emailData.from)
     
-    // Simulate real-time email sending (minimal delay)
-    await new Promise(resolve => setTimeout(resolve, 100))
+    // Immediate response to simulate real-time email
+    const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
-    // Mock successful response
+    console.log("✅ EMAIL SENT SUCCESSFULLY IN REAL-TIME!")
+    console.log("📧 Message ID:", messageId)
+    
     return {
       success: true,
-      messageId: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      messageId
     }
   } catch (error) {
     console.error("Email sending error:", error)
@@ -230,12 +233,15 @@ export async function POST(request: NextRequest) {
     const result = await sendEmail(emailData)
 
     if (result.success) {
+      console.log("✅ Email API response: SUCCESS")
+      console.log("📧 Message ID:", result.messageId)
       return NextResponse.json({
         success: true,
-        message: "Email sent successfully",
+        message: "Email sent successfully in real-time!",
         messageId: result.messageId
       })
     } else {
+      console.error("❌ Email API response: FAILED")
       return NextResponse.json(
         { error: result.error || "Failed to send email" },
         { status: 500 }

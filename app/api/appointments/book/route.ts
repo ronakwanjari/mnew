@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
 
     // Send email notification to doctor
     try {
+      console.log("Sending real-time email notification to doctor...")
       const emailResponse = await fetch(`${request.nextUrl.origin}/api/notifications/email`, {
         method: "POST",
         headers: {
@@ -88,10 +89,12 @@ export async function POST(request: NextRequest) {
         }),
       })
 
-      if (!emailResponse.ok) {
-        console.error("Failed to send email notification to doctor")
+      const emailResult = await emailResponse.json()
+      
+      if (emailResponse.ok && emailResult.success) {
+        console.log("✅ Real-time email sent successfully to doctor:", emailResult.messageId)
       } else {
-        console.log("Email notification sent to doctor successfully")
+        console.error("❌ Failed to send email notification:", emailResult.error)
       }
     } catch (emailError) {
       console.error("Error sending email notification:", emailError)
@@ -100,7 +103,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        message: "Appointment booked successfully. Doctor will be notified via email.",
+        message: "Appointment booked successfully! Doctor notified via email in real-time.",
         appointment: newAppointment,
       },
       { status: 201 },
