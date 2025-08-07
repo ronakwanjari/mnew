@@ -98,7 +98,7 @@ export default function DoctorDashboard() {
 
     toast({
       title: action === "approve" ? "Appointment Approved" : "Appointment Rejected",
-      description: `Patient will be notified via email about the ${action === "approve" ? "approval" : "rejection"}. Email sent in real-time.`,
+      description: `Patient notified via email in real-time! ${action === "approve" ? "Confirmation" : "Rejection"} email sent instantly.`,
     })
   }
 
