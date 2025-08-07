@@ -32,11 +32,16 @@ export async function POST(req: NextRequest) {
       try {
         console.log(`Trying ${endpoint.model}...`)
 
+        // Create AbortController with longer timeout (15 seconds)
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 15000)
+
         const response = await fetch(endpoint.url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
+          signal: controller.signal,
           body: JSON.stringify({
             contents: [
               {
@@ -92,6 +97,9 @@ Respond as MEDIBOT with a caring, conversational tone. If this seems like a seri
             ],
           }),
         })
+
+        // Clear timeout if request completes successfully
+        clearTimeout(timeoutId)
 
         if (response.ok) {
           const data = await response.json()
@@ -174,8 +182,13 @@ Respond as MEDIBOT with a caring, conversational tone. If this seems like a seri
         lastError = `${endpoint.model}: ${response.status} - ${errorText}`
         console.error(`Failed with ${endpoint.model}:`, response.status, errorText)
       } catch (error) {
-        lastError = `${endpoint.model}: ${error}`
-        console.error(`Error with ${endpoint.model}:`, error)
+        if (error.name === 'AbortError') {
+          lastError = `${endpoint.model}: Request timed out after 15 seconds`
+          console.error(`Timeout with ${endpoint.model}:`, 'Request timed out')
+        } else {
+          lastError = `${endpoint.model}: ${error}`
+          console.error(`Error with ${endpoint.model}:`, error)
+        }
         continue
       }
     }
