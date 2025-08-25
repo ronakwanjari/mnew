@@ -1,5 +1,5 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -15,8 +15,12 @@ export const metadata: Metadata = {
   description: "Your personal AI health companion for symptom analysis, doctor consultations, and health monitoring",
   keywords: "healthcare, AI, medical, symptoms, doctor, consultation, health monitoring",
   authors: [{ name: "MEDIBOT Team" }],
-  viewport: "width=device-width, initial-scale=1",
-    generator: 'v0.dev'
+  generator: 'v0.dev'
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({
