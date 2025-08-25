@@ -603,7 +603,34 @@ export default function AppointmentsPage() {
 
                     {appointment.status === "approved" && (
                       <div className="flex space-x-2 pt-4 border-t">
-                        <Button size="sm">
+                        <Button 
+                          size="sm"
+                          onClick={async () => {
+                            try {
+                              // Create video call room
+                              const response = await fetch('/api/video-calls/create', {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                  appointmentId: appointment._id,
+                                  doctorId: appointment.doctorId,
+                                  patientId: appointment.patientId,
+                                  doctorName: appointment.doctorName,
+                                  patientName: appointment.patientName
+                                }),
+                              })
+                              
+                              if (response.ok) {
+                                const data = await response.json()
+                                window.open(`/video-call/${data.videoCall.roomId}?role=patient`, '_blank')
+                              }
+                            } catch (error) {
+                              console.error('Failed to join video call:', error)
+                            }
+                          }}
+                        >
                           <Video className="h-4 w-4 mr-1" />
                           Join Video Call
                         </Button>
