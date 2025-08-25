@@ -1,0 +1,140 @@
+Perfect 👍 thanks for clarifying.
+So now the **prompt for Replit** will use:
+
+* **Clerk** → Authentication & Role Management
+* **Vonage** → Video Calling
+
+Here’s the **refined detailed prompt** you can copy-paste into Replit AI (or any code generator).
+
+---
+
+# 🏥 Smart Healthcare Platform (Extended Doctor Appointment System)
+
+**Goal:** Build a **full-stack healthcare platform** with **doctor appointments, AI chatbot, vitals monitoring, pharmacy ordering, role-based authentication via Clerk, and video consultation via Vonage**.
+
+---
+
+## 🔑 Core Features
+
+### 1. **Authentication (Clerk)**
+
+* Integrate **Clerk** for authentication and role-based access.
+* Roles:
+
+  * **Admin** → Manage doctors, pharmacies, users, and view all vitals.
+  * **Doctor** → View/respond to appointments, access patient vitals.
+  * **User (Patient)** → Book appointments, chat with AI bot, monitor vitals, order medicines.
+
+---
+
+### 2. **Doctor Appointment Booking System**
+
+* **Users** can:
+
+  * Search doctors by specialization.
+  * Book, reschedule, cancel appointments.
+  * Join video consultations.
+* **Doctors** can:
+
+  * Toggle availability.
+  * Accept/reject appointments.
+  * Mark completed & add notes.
+* **Video Consultations:**
+
+  * Use **Vonage API** to generate session & token.
+  * User + Doctor join secure video call inside app.
+
+---
+
+### 3. **AI Medical Chatbot (Gemini API)**
+
+* Integrate **Gemini API** (`AIzaSyAmJ37gnnNDdUtDahFakcNnNlZsk7Eb9Rw`).
+* Chatbot features:
+
+  * Accept user symptom input.
+  * Suggest health tips & possible conditions.
+  * If serious → advise booking doctor appointment.
+  * If user asks → auto-trigger appointment booking flow.
+
+---
+
+### 4. **Vitals Monitoring Dashboard (ESP32)**
+
+* ESP32 device sends **Heart Rate, SpO₂, Temperature, BMI** to **Firebase (Realtime DB) or REST API**.
+* Store vitals with **user ID + timestamp**.
+* Dashboard shows:
+
+  * **Live readings**.
+  * **Historical data (graphs/charts)**.
+* Doctors/Admin can view patient vitals history.
+
+---
+
+### 5. **Pharmacy Delivery System**
+
+* **Admin**:
+
+  * Add pharmacies, medicines, stock, pricing.
+* **Users**:
+
+  * Browse pharmacies, search medicines.
+  * Request/order medicines.
+* **Pharmacy**:
+
+  * Update order status (*Pending → Accepted → Delivered*).
+
+---
+
+## 🛠️ Tech Stack
+
+* **Frontend:** React (Next.js if supported on Replit), TailwindCSS, shadcn UI.
+* **Backend:** Node.js + Express.js.
+* **Auth:** Clerk (with role-based access).
+* **Database:** MongoDB or Firebase (ESP32 data integration).
+* **Video Calls:** Vonage API.
+* **Chatbot:** Gemini API.
+* **ESP32 Integration:** Firebase Realtime DB or REST endpoints.
+
+---
+
+## 🚀 Deliverables
+
+1. **Frontend**
+
+   * Patient Dashboard: chatbot, appointments, vitals, pharmacy.
+   * Doctor Dashboard: appointments + patient vitals.
+   * Admin Dashboard: manage users, doctors, pharmacies.
+   * Embedded **Vonage video call component**.
+
+2. **Backend APIs**
+
+   * Appointment booking CRUD.
+   * Pharmacy & medicine management.
+   * Vitals data ingestion & fetch.
+   * AI Chatbot wrapper (Gemini → app).
+
+3. **Integration**
+
+   * Clerk for role-based auth.
+   * Vonage for secure video calls.
+   * Firebase/REST API for ESP32 data.
+
+---
+
+## 🌟 Bonus Features
+
+* Notifications (Email/SMS) when appointment confirmed.
+* Doctor uploads digital prescription after consultation.
+* Pharmacy + delivery tracking.
+
+---
+
+👉 **Build this as a full-stack app**.
+
+* Use **Clerk** for authentication & role-based access.
+* Use **Vonage** for video consultation.
+* Make it modular so features can be added step by step.
+
+---
+
+⚡ Would you like me to also **split this into a step-by-step development roadmap** (Frontend first → Backend APIs → ESP32 integration → Chatbot → Pharmacy) so Replit builds it in chunks instead of overwhelming in one go?
