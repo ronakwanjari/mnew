@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { ClerkProvider } from '@clerk/nextjs'
-import { ConvexClientProvider } from '@/components/convex-client-provider'
+import { ConvexClientProvider } from '@/components/convex-provider'
 
 const inter = Inter({ subsets: ["latin"] })
 
