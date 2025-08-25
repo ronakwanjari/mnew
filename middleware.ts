@@ -1,9 +1,16 @@
 
-import { authMiddleware } from "@clerk/nextjs";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs";
 
-export default authMiddleware({
-  publicRoutes: ["/", "/api/webhooks(.*)"],
-  ignoredRoutes: ["/api/test-gemini"]
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/api/webhooks(.*)",
+  "/api/test-gemini"
+]);
+
+export default clerkMiddleware((auth, request) => {
+  if (!isPublicRoute(request)) {
+    auth().protect();
+  }
 });
 
 export const config = {
