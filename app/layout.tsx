@@ -5,6 +5,8 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { ErrorBoundary } from "@/components/error-boundary"
+import { ClerkProvider } from '@clerk/nextjs'
+import { ConvexClientProvider } from '@/components/convex-client-provider'
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -23,58 +25,62 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Safe error suppression for browser extensions
-              (function() {
-                const originalConsoleError = console.error;
-                console.error = function(...args) {
-                  const message = args.join(' ').toLowerCase();
-                  const extensionKeywords = ['metamask', 'ethereum', 'web3', 'coinbase', 'wallet', 'crypto', 'blockchain', 'extension'];
-                  
-                  if (!extensionKeywords.some(keyword => message.includes(keyword))) {
-                    originalConsoleError.apply(console, args);
-                  }
-                };
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <head>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                // Safe error suppression for browser extensions
+                (function() {
+                  const originalConsoleError = console.error;
+                  console.error = function(...args) {
+                    const message = args.join(' ').toLowerCase();
+                    const extensionKeywords = ['metamask', 'ethereum', 'web3', 'coinbase', 'wallet', 'crypto', 'blockchain', 'extension'];
 
-                // Handle unhandled promise rejections
-                window.addEventListener('unhandledrejection', function(event) {
-                  const reason = String(event.reason).toLowerCase();
-                  const extensionKeywords = ['metamask', 'ethereum', 'web3', 'coinbase', 'wallet', 'crypto', 'blockchain', 'extension'];
-                  
-                  if (extensionKeywords.some(keyword => reason.includes(keyword))) {
-                    event.preventDefault();
-                    return false;
-                  }
-                });
+                    if (!extensionKeywords.some(keyword => message.includes(keyword))) {
+                      originalConsoleError.apply(console, args);
+                    }
+                  };
 
-                // Handle general errors
-                window.addEventListener('error', function(event) {
-                  const message = event.message?.toLowerCase() || '';
-                  const extensionKeywords = ['metamask', 'ethereum', 'web3', 'coinbase', 'wallet', 'crypto', 'blockchain', 'extension'];
-                  
-                  if (extensionKeywords.some(keyword => message.includes(keyword))) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    return false;
-                  }
-                });
-              })();
-            `,
-          }}
-        />
-      </head>
-      <body className={inter.className}>
-        <ErrorBoundary>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            {children}
-            <Toaster />
-          </ThemeProvider>
-        </ErrorBoundary>
-      </body>
-    </html>
+                  // Handle unhandled promise rejections
+                  window.addEventListener('unhandledrejection', function(event) {
+                    const reason = String(event.reason).toLowerCase();
+                    const extensionKeywords = ['metamask', 'ethereum', 'web3', 'coinbase', 'wallet', 'crypto', 'blockchain', 'extension'];
+
+                    if (extensionKeywords.some(keyword => reason.includes(keyword))) {
+                      event.preventDefault();
+                      return false;
+                    }
+                  });
+
+                  // Handle general errors
+                  window.addEventListener('error', function(event) {
+                    const message = event.message?.toLowerCase() || '';
+                    const extensionKeywords = ['metamask', 'ethereum', 'web3', 'coinbase', 'wallet', 'crypto', 'blockchain', 'extension'];
+
+                    if (extensionKeywords.some(keyword => message.includes(keyword))) {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      return false;
+                    }
+                  });
+                })();
+              `,
+            }}
+          />
+        </head>
+        <body className={inter.className}>
+          <ConvexClientProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+              <ErrorBoundary>
+                {children}
+                <Toaster />
+              </ErrorBoundary>
+            </ThemeProvider>
+          </ConvexClientProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }

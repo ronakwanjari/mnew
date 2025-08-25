@@ -9,6 +9,7 @@ import { LayoutDashboard, Bot, Calendar, Pill, User, Activity, LogOut, Menu, Bel
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { useUser, SignOutButton } from "@clerk/nextjs"
 
 const navigation = [
   { name: "Dashboard", href: "/patient/dashboard", icon: LayoutDashboard },
@@ -26,6 +27,11 @@ interface PatientLayoutProps {
 export function PatientLayout({ children }: PatientLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
+  const { user } = useUser()
+
+  const userName = user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split("@")[0] || "Patient"
+  const userEmail = user?.emailAddresses?.[0]?.emailAddress || ""
+
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -94,12 +100,19 @@ export function PatientLayout({ children }: PatientLayoutProps) {
                 <AvatarFallback>JD</AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">Ronak W</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{userName}</p>
                 <p className="text-xs text-gray-500">Patient</p>
               </div>
-              <Button variant="ghost" size="sm">
-                <LogOut className="h-4 w-4" />
-              </Button>
+              <SignOutButton redirectUrl="/login">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </Button>
+              </SignOutButton>
             </div>
           </div>
         </div>
