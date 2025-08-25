@@ -74,7 +74,7 @@ export default function RootLayout({
             }}
           />
         </head>
-        <body className={inter.className}>
+        <body className={inter.className} suppressHydrationWarning={true}>
           <ConvexClientProvider>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
               <ErrorBoundary>
