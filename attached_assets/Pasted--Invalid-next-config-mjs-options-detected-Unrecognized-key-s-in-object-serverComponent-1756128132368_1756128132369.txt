@@ -1,0 +1,45 @@
+⚠ Invalid next.config.mjs options detected: 
+ ⚠     Unrecognized key(s) in object: 'serverComponentsExternalPackages' at "experimental"
+ ⚠     Unrecognized key(s) in object: 'swcMinify'
+ ⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+ ⚠ `experimental.serverComponentsExternalPackages` has been moved to `serverExternalPackages`. Please update your next.config.mjs file accordingly.
+ ✓ Ready in 2.3s
+ ✓ Compiled /middleware in 234ms
+ ⚠ ./middleware.ts
+Attempted import error: 'createRouteMatcher' is not exported from '@clerk/nextjs' (imported as 'createRouteMatcher').
+
+./middleware.ts
+Attempted import error: 'clerkMiddleware' is not exported from '@clerk/nextjs' (imported as 'clerkMiddleware').
+ ⨯ Error [TypeError]: (0 , _clerk_nextjs__WEBPACK_IMPORTED_MODULE_0__.createRouteMatcher) is not a function
+    at <unknown> (middleware.ts:4)
+    at eval (middleware.ts:4:41)
+    at (middleware)/./middleware.ts (.next/server/middleware.js:18:1)
+    at __webpack_require__ (.next/server/edge-runtime-webpack.js:37:33)
+    at fn (.next/server/edge-runtime-webpack.js:281:21)
+    at (middleware)/./node_modules/next/dist/build/webpack/loaders/next-middleware-loader.js?absolutePagePath=%2Fhome%2Frunner%2Fworkspace%2Fmiddleware.ts&page=%2Fmiddleware&rootDir=%2Fhome%2Frunner%2Fworkspace&matchers=&preferredRegion=&middlewareConfig=e30%3D! (.next/server/middleware.js:1357:1)
+    at __webpack_require__ (.next/server/edge-runtime-webpack.js:37:33)
+    at __webpack_exec__ (.next/server/middleware.js:2557:48)
+    at <unknown> (.next/server/middleware.js:2558:37)
+    at webpackJsonpCallback (.next/server/edge-runtime-webpack.js:1136:39)
+  2 | import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs";
+  3 |
+> 4 | const isPublicRoute = createRouteMatcher([
+    |                                         ^
+  5 |   "/",
+  6 |   "/api/webhooks(.*)",
+  7 |   "/api/test-gemini"
+ ⚠ ./middleware.ts
+Attempted import error: 'createRouteMatcher' is not exported from '@clerk/nextjs' (imported as 'createRouteMatcher').
+
+./middleware.ts
+Attempted import error: 'clerkMiddleware' is not exported from '@clerk/nextjs' (imported as 'clerkMiddleware').
+ ○ Compiling /_error ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (166kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ⚠ ./middleware.ts
+Attempted import error: 'createRouteMatcher' is not exported from '@clerk/nextjs' (imported as 'createRouteMatcher').
+
+./middleware.ts
+Attempted import error: 'clerkMiddleware' is not exported from '@clerk/nextjs' (imported as 'clerkMiddleware').
+ ⚠ Cross origin request detected from 19429599-76f5-4127-9432-5a61b692f08e-00-29ycp0hbnx8jh.pike.replit.dev to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+^C
